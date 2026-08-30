@@ -28,6 +28,7 @@
 - [x] Pantallas implementadas: `/dashboard` (Radar de Burnout + alertas IA), `/entry/new` (editor + autocompletado de etiquetas), `/history` (línea de tiempo con indicador de estrés)
 - [x] `npm run build` verificado en local (`vite build` OK)
 - [x] Dev server de Vite verificado (puerto 5173, proxy `/api` → `localhost:3001`)
+- [x] Commit + push del Bloque 3 (`d4118b8`)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar flujo completo frontend → API → Groq → BD.
