@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**Bloque 0 — Inicialización del proyecto** (EN CURSO)
+**Bloque 0 — Inicialización del proyecto** (COMPLETADO)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -9,10 +9,10 @@
 - [x] Configuración del remoto: `https://github.com/cecf-dev/diario-inteligente.git`
 - [x] Creación de `README.md`
 - [x] Creación de `.gitignore`
+- [x] Commit del Bloque 0 con mensaje descriptivo
+- [x] Push al repositorio remoto (`main`)
 
 ## Tareas Pendientes Inmediatas
-- [ ] Commit del Bloque 0 con mensaje descriptivo
-- [ ] Push al repositorio remoto
 - [ ] **Bloque 1 — Base de datos:** PostgreSQL + `pgvector` (docker-compose) y script SQL de migración (tablas `users`, `entries`, `entry_analysis`)
 
 ## Decisiones Técnicas
