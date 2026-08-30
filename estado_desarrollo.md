@@ -34,10 +34,10 @@
 - [x] Commit + push del Bloque 4 (pendiente registrar hash)
 
 ## Tareas Pendientes Inmediatas
-- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar flujo completo frontend → API → Groq → BD.
+- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar flujo completo frontend → API → Groq → BD (pasos documentados en el README).
 - [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
 - [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG.
-- [ ] **Bloque 4 — Integración GitHub / pulido final:** revisar commits, documentar arranque (README con instrucciones) y verificación de todo el stack.
+- [ ] **Siguiente evolución sugerida:** alertas de burnout generadas por IA en el backend (hoy son heurística local), carga cognitiva y estrés vs. logro (requieren campos adicionales), autenticación de usuarios (hoy usuario demo único), historial frontend con paginación.
 
 ## Decisiones Técnicas
 | Clave | Valor |
