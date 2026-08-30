@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**Bloque 1 — Base de datos** (EN CURSO)
+**Bloque 1 — Base de datos** (COMPLETADO, verificación pendiente)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -14,6 +14,7 @@
 - [x] Bloque 0 completado (commits `bbc0a28`, `63a1040`)
 - [x] Creación de `docker-compose.yml` (pgvector/pgvector:pg16)
 - [x] Creación de la migración `db/init/001_schema.sql` (tablas `users`, `entries`, `entry_analysis`)
+- [x] Commit + push del Bloque 1 (`2b5f69c`)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Verificación pendiente:** levantar el contenedor de BD y aplicar la migración. (Bloqueado: Docker no está instalado en la máquina de desarrollo; requiere `docker compose up -d` y validar las tablas)
