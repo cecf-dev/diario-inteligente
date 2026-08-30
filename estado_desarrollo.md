@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**Bloque 3 — Frontend (React + Tailwind)** (COMPLETADO, verificación E2E pendiente)
+**Bloque 4 — Integración y documentación final** (COMPLETADO — MVP terminado; queda verificación E2E en entorno con Docker + Groq)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -28,7 +28,10 @@
 - [x] Pantallas implementadas: `/dashboard` (Radar de Burnout + alertas IA), `/entry/new` (editor + autocompletado de etiquetas), `/history` (línea de tiempo con indicador de estrés)
 - [x] `npm run build` verificado en local (`vite build` OK)
 - [x] Dev server de Vite verificado (puerto 5173, proxy `/api` → `localhost:3001`)
-- [x] Commit + push del Bloque 3 (`d4118b8`)
+- [x] Commit + push del Bloque 3 (`d4118b8`, `550d706`)
+- [x] README actualizado con estructura del proyecto, API, requisitos y puesta en marcha completa (BD + backend + frontend)
+- [x] Verificación integral: backend con CORS responde `/health` 200; `GET /api/entries` sin BD da error controlado (ECONNREFUSED); `git log` revisado (8 commits, uno por bloque)
+- [x] Commit + push del Bloque 4 (pendiente registrar hash)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar flujo completo frontend → API → Groq → BD.
