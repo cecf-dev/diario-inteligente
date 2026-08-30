@@ -21,7 +21,7 @@
 - [x] Servidor Express con `/health` verificado en local (puerto 3001)
 - [x] Endpoints `POST /api/entries` (crea entrada + análisis Groq + embedding stub) y `GET /api/entries` (historial)
 - [x] `resolveUserId` con usuario demo (`demo@diario.local`) por defecto
-- [x] Commit + push del Bloque 2 (pendiente registrar hash)
+- [x] Commit + push del Bloque 2 (`8962050`)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar `POST /api/entries` de punta a punta.
