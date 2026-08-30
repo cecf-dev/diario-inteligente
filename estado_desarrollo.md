@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**Bloque 2 — Backend (Express + Groq)** (COMPLETADO, verificación E2E pendiente)
+**Bloque 3 — Frontend (React + Tailwind)** (COMPLETADO, verificación E2E pendiente)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -21,24 +21,36 @@
 - [x] Servidor Express con `/health` verificado en local (puerto 3001)
 - [x] Endpoints `POST /api/entries` (crea entrada + análisis Groq + embedding stub) y `GET /api/entries` (historial)
 - [x] `resolveUserId` con usuario demo (`demo@diario.local`) por defecto
-- [x] Commit + push del Bloque 2 (`8962050`)
+- [x] Commit + push del Bloque 2 (`8962050`, `e927e50`)
+- [x] Frontend `frontend/` con Vite 8 + React 19 + Tailwind CSS v4
+- [x] Dependencias: `react`, `react-router-dom`, `recharts`, `tailwindcss`, `@tailwindcss/vite`
+- [x] CORS habilitado en el backend (`cors`)
+- [x] Pantallas implementadas: `/dashboard` (Radar de Burnout + alertas IA), `/entry/new` (editor + autocompletado de etiquetas), `/history` (línea de tiempo con indicador de estrés)
+- [x] `npm run build` verificado en local (`vite build` OK)
+- [x] Dev server de Vite verificado (puerto 5173, proxy `/api` → `localhost:3001`)
 
 ## Tareas Pendientes Inmediatas
-- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar `POST /api/entries` de punta a punta.
-- [ ] **Bloque 3 — Frontend:** React.js + Tailwind CSS con las pantallas `/dashboard`, `/entry/new`, `/history`.
+- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar flujo completo frontend → API → Groq → BD.
+- [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
+- [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG.
+- [ ] **Bloque 4 — Integración GitHub / pulido final:** revisar commits, documentar arranque (README con instrucciones) y verificación de todo el stack.
 
 ## Decisiones Técnicas
 | Clave | Valor |
 | :--- | :--- |
 | Stack | React + Tailwind / Node.js + Express / PostgreSQL + pgvector / Groq API |
-| Backend | `backend/` — Node ESM, Express 5, `pg` (Pool), `groq-sdk` |
+| Backend | `backend/` — Node ESM, Express 5, `pg` (Pool), `groq-sdk`, `cors` |
+| Frontend | `frontend/` — Vite 8, React 19, Tailwind v4 (`@tailwindcss/vite`), `recharts`, `react-router-dom` |
 | Puerto (backend) | `3001` (`PORT` en `.env`) |
+| Puerto (frontend/dev) | `5173` con proxy `/api` → `http://localhost:3001` |
 | Ruta raíz | `POST /api/entries` y `GET /api/entries`; `GET /health` |
 | Modelo Groq | `llama-3.3-70b-versatile` (configurable con `GROQ_MODEL`) |
 | Formato de análisis | JSON con `burnout_score` (1-10), `primary_emotion`, `entities_tags[]` vía `response_format: json_object` |
 | Embeddings | Stub `generateEmbedding()` devuelve `null`; pendiente proveedor real para RAG |
 | Usuario por defecto | `demo@diario.local` (sin auth en MVP) |
-| Config | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT` |
+| Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT` |
+| Config frontend | `frontend/.env.example` → `VITE_API_URL` (default `/api`) |
+| Alertas del dashboard | Calculadas con heurística local (trabajo nocturno 23:00-06:00, alta frecuencia de `burnout_score ≥ 7`); pendiente generarlas con IA en el backend |
 | Imagen de BD | `pgvector/pgvector:pg16` (incluye extensión `vector`) |
 | Puerto (BD) | `5432` (host) → 5432 (contenedor) |
 | Credenciales BD (local) | usuario: `diario` / password: `diario_password` / db: `diario_inteligente` (SÓLO local, no producción) |
