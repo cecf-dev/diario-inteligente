@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { Link } from 'react-router-dom';
 import { fetchEntries } from '../api.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import StressBadge from '../components/StressBadge.jsx';
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -67,14 +68,25 @@ function buildAlerts(entries) {
 }
 
 export default function Dashboard() {
+  const { getToken } = useAuth();
   const [entries, setEntries] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchEntries()
-      .then(setEntries)
-      .catch((err) => setError(err.message));
-  }, []);
+    let alive = true;
+    (async () => {
+      try {
+        const token = await getToken();
+        const data = await fetchEntries(token);
+        if (alive) setEntries(data);
+      } catch (err) {
+        if (alive) setError(err.message);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [getToken]);
 
   const stats = useMemo(() => {
     if (!entries) return null;

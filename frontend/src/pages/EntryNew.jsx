@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createEntry } from '../api.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import StressBadge from '../components/StressBadge.jsx';
 
 const QUICK_TAGS = [
@@ -13,6 +14,7 @@ const QUICK_TAGS = [
 ];
 
 export default function EntryNew() {
+  const { getToken } = useAuth();
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null);
@@ -32,7 +34,8 @@ export default function EntryNew() {
     setSaving(true);
     setError(null);
     try {
-      const data = await createEntry(text.trim());
+      const token = await getToken();
+      const data = await createEntry(text.trim(), token);
       setResult(data);
     } catch (err) {
       setError(err.message);
