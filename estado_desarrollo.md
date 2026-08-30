@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 2 — Autenticación (Firebase Auth).** Bloque A — Base de datos (EN CURSO)
+**FASE 2 — Autenticación (Firebase Auth).** Bloque A — BD (COMPLETADO)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -33,7 +33,7 @@
 - [x] Verificación integral: backend con CORS responde `/health` 200; `GET /api/entries` sin BD da error controlado (ECONNREFUSED); `git log` revisado (8 commits, uno por bloque)
 - [x] Commit + push del Bloque 4 (`2ffeefb`, `11e2b33`)
 - [x] **FASE 2 — Autenticación:** revisión del prompt actualizado (Firebase Auth, `users.id`/`entries.user_id` → VARCHAR UID, /login y /register, rutas protegidas, historial por UID)
-- [x] **Bloque A — BD:** `001_schema.sql` actualizado: `users.id VARCHAR(255)` (PK = UID Firebase), `entries.user_id VARCHAR(255)` (FK). Se modificó en sitio porque aún no existe ninguna BD aprovisionada (verificación Docker pendiente); sin riesgo de pérdida de datos.
+- [x] **Bloque A — BD:** `001_schema.sql` actualizado: `users.id VARCHAR(255)` (PK = UID Firebase), `entries.user_id VARCHAR(255)` (FK). Se modificó en sitio porque aún no existe ninguna BD aprovisionada (verificación Docker pendiente); sin riesgo de pérdida de datos. Commit + push (`f9c1fd9`)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Bloque B — Backend (auth):** `firebase-admin`, middleware `requireAuth`, extraer `uid` del Bearer Token, eliminar usuario demo, respuestas 401/403, env vars `FIREBASE_*`.
