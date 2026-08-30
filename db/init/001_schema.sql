@@ -1,20 +1,23 @@
 -- 001_schema.sql
 -- Migración inicial del Diario Inteligente
 -- PostgreSQL 16 + pgvector
+--
+-- Nota de autenticación:
+-- users.id corresponde al UID de Firebase Auth (VARCHAR), no a un UUID autogenerado.
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE IF NOT EXISTS users (
-    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    id         VARCHAR(255) PRIMARY KEY,
     email      VARCHAR(255) NOT NULL UNIQUE,
-    created_at TIMESTAMP   NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS entries (
-    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    raw_text   TEXT        NOT NULL,
-    created_at TIMESTAMP   NOT NULL DEFAULT NOW()
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    raw_text   TEXT         NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS entry_analysis (

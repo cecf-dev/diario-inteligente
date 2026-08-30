@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**Bloque 4 — Integración y documentación final** (COMPLETADO — MVP terminado; queda verificación E2E en entorno con Docker + Groq)
+**FASE 2 — Autenticación (Firebase Auth).** Bloque A — Base de datos (EN CURSO)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -31,13 +31,17 @@
 - [x] Commit + push del Bloque 3 (`d4118b8`, `550d706`)
 - [x] README actualizado con estructura del proyecto, API, requisitos y puesta en marcha completa (BD + backend + frontend)
 - [x] Verificación integral: backend con CORS responde `/health` 200; `GET /api/entries` sin BD da error controlado (ECONNREFUSED); `git log` revisado (8 commits, uno por bloque)
-- [x] Commit + push del Bloque 4 (pendiente registrar hash)
+- [x] Commit + push del Bloque 4 (`2ffeefb`, `11e2b33`)
+- [x] **FASE 2 — Autenticación:** revisión del prompt actualizado (Firebase Auth, `users.id`/`entries.user_id` → VARCHAR UID, /login y /register, rutas protegidas, historial por UID)
+- [x] **Bloque A — BD:** `001_schema.sql` actualizado: `users.id VARCHAR(255)` (PK = UID Firebase), `entries.user_id VARCHAR(255)` (FK). Se modificó en sitio porque aún no existe ninguna BD aprovisionada (verificación Docker pendiente); sin riesgo de pérdida de datos.
 
 ## Tareas Pendientes Inmediatas
-- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY`): levantar BD, aplicar migración, probar flujo completo frontend → API → Groq → BD (pasos documentados en el README).
+- [ ] **Bloque B — Backend (auth):** `firebase-admin`, middleware `requireAuth`, extraer `uid` del Bearer Token, eliminar usuario demo, respuestas 401/403, env vars `FIREBASE_*`.
+- [ ] **Bloque C — Frontend (auth):** SDK de Firebase client, AuthContext, pantallas `/login` y `/register`, rutas protegidas, enviar Bearer Token, logout.
+- [ ] **Bloque D — Integración:** README con pasos de Firebase (crear proyecto, service account, config web) y verificación.
+- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY` + Firebase): flujo completo login → API → Groq → BD.
 - [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
 - [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG.
-- [ ] **Siguiente evolución sugerida:** alertas de burnout generadas por IA en el backend (hoy son heurística local), carga cognitiva y estrés vs. logro (requieren campos adicionales), autenticación de usuarios (hoy usuario demo único), historial frontend con paginación.
 
 ## Decisiones Técnicas
 | Clave | Valor |
@@ -51,7 +55,8 @@
 | Modelo Groq | `llama-3.3-70b-versatile` (configurable con `GROQ_MODEL`) |
 | Formato de análisis | JSON con `burnout_score` (1-10), `primary_emotion`, `entities_tags[]` vía `response_format: json_object` |
 | Embeddings | Stub `generateEmbedding()` devuelve `null`; pendiente proveedor real para RAG |
-| Usuario por defecto | `demo@diario.local` (sin auth en MVP) |
+| Autenticación | **En proceso (Fase 2):** Firebase Auth. Frontend: Bearer Token con cada petición. Backend: validación con Firebase Admin SDK; `uid` = `user_id`. `users.id` es `VARCHAR` = UID |
+| Usuario por defecto | **Eliminar** cuando se habilite auth (antes: `demo@diario.local`) |
 | Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT` |
 | Config frontend | `frontend/.env.example` → `VITE_API_URL` (default `/api`) |
 | Alertas del dashboard | Calculadas con heurística local (trabajo nocturno 23:00-06:00, alta frecuencia de `burnout_score ≥ 7`); pendiente generarlas con IA en el backend |
