@@ -1,22 +1,23 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
-import { resolveUserId } from '../services/demoUser.js';
+import { requireAuth } from '../middleware/auth.js';
 import { analyzeEntry } from '../services/groqService.js';
 import { generateEmbedding } from '../services/embeddingService.js';
 
 const router = Router();
 
+router.use(requireAuth);
+
 router.post('/', async (req, res, next) => {
   try {
     const rawText = req.body?.raw_text;
-    const userId = req.body?.user_id;
 
     if (typeof rawText !== 'string' || rawText.trim().length === 0) {
       return res.status(400).json({ error: 'raw_text es obligatorio' });
     }
 
     const text = rawText.trim();
-    const ownerId = await resolveUserId(userId);
+    const ownerId = req.user.uid;
 
     const client = await pool.connect();
     try {
@@ -55,7 +56,9 @@ router.get('/', async (req, res, next) => {
               a.burnout_score, a.primary_emotion, a.entities_tags
        FROM entries e
        LEFT JOIN entry_analysis a ON a.entry_id = e.id
-       ORDER BY e.created_at DESC`
+       WHERE e.user_id = $1
+       ORDER BY e.created_at DESC`,
+      [req.user.uid]
     );
     res.json(result.rows);
   } catch (err) {
