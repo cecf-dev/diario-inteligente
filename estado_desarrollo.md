@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 2 — Autenticación (Firebase Auth).** Bloque D — Integración y documentación (EN CURSO → COMPLETADO al pushear)
+**FASE 2 — Autenticación (Firebase Auth).** COMPLETADA (todos los bloques A-D; solo resta verificación E2E con credenciales reales)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -36,7 +36,7 @@
 - [x] **Bloque A — BD:** `001_schema.sql` actualizado: `users.id VARCHAR(255)` (PK = UID Firebase), `entries.user_id VARCHAR(255)` (FK). Se modificó en sitio porque aún no existe ninguna BD aprovisionada (verificación Docker pendiente); sin riesgo de pérdida de datos. Commit + push (`f9c1fd9`)
 - [x] **Bloque B — Backend (auth):** `firebase-admin` instalado; `src/firebase.js` (init lazy con `cert()` o ADC), middleware `requireAuth` (valida Bearer Token → `uid`, `401` si falta/venció), `ensureUser` (upsert del usuario en `users`), rutas `/api/entries` protegidas y con `uid` del token; historial filtrado por `req.user.uid`; usuario demo eliminado. Verificado: `/health` 200 sin credenciales Firebase; `/api/entries` sin token → 401. Commit + push (`9788e08`)
 - [x] **Bloque C — Frontend (auth):** `firebase` (client) instalado; `src/firebase.js` (config web), `AuthContext` (login/register/logout/getToken + `onAuthStateChanged`), `ProtectedRoute`, páginas `/login` y `/register`, `App.jsx` con rutas protegidas y header con email + logout, `api.js` envía `Authorization: Bearer <token>`, Dashboard/History/EntryNew usan `getToken()`. Verificado: `vite build` OK y dev server responde 200. `.env.example` con vars `VITE_FIREBASE_*`. Commit + push (`0933182`)
-- [x] **Bloque D — Integración:** README actualizado con configuración de Firebase (crear proyecto, habilitar email/password, config web, service account con advertencia de seguridad), API con Bearer Token, requisitos y puesta en marcha. `git log` revisado (14 commits).
+- [x] **Bloque D — Integración:** README actualizado con configuración de Firebase (crear proyecto, habilitar email/password, config web, service account con advertencia de seguridad), API con Bearer Token, requisitos y puesta en marcha. `git log` revisado (14 commits). Commit + push (`60e4395`)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **FASE 2 — Único pendiente:** verificación E2E real con credenciales de Firebase + Docker + `GROQ_API_KEY` (flujo completo: registro → login → crear entrada → análisis → historial). Pasos en el README.
