@@ -8,7 +8,7 @@ Aplicación web de telemetría emocional y prevención de burnout para estudiant
 - **Backend:** Node.js + Express.js 5
 - **Autenticación:** Firebase Auth (frontend) + Firebase Admin SDK (backend)
 - **Base de Datos:** PostgreSQL 16 con extensión `pgvector`
-- **IA:** Groq API (modelos Llama 3) para inferencia ultrarrápida
+- **IA:** Groq API para inferencia ultrarrápida (modelo configurable vía `GROQ_MODEL`, default `openai/gpt-oss-20b`)
 
 ## Estructura del Proyecto
 

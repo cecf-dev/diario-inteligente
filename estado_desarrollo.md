@@ -37,10 +37,10 @@
 - [x] **Bloque B — Backend (auth):** `firebase-admin` instalado; `src/firebase.js` (init lazy con `cert()` o ADC), middleware `requireAuth` (valida Bearer Token → `uid`, `401` si falta/venció), `ensureUser` (upsert del usuario en `users`), rutas `/api/entries` protegidas y con `uid` del token; historial filtrado por `req.user.uid`; usuario demo eliminado. Verificado: `/health` 200 sin credenciales Firebase; `/api/entries` sin token → 401. Commit + push (`9788e08`)
 - [x] **Bloque C — Frontend (auth):** `firebase` (client) instalado; `src/firebase.js` (config web), `AuthContext` (login/register/logout/getToken + `onAuthStateChanged`), `ProtectedRoute`, páginas `/login` y `/register`, `App.jsx` con rutas protegidas y header con email + logout, `api.js` envía `Authorization: Bearer <token>`, Dashboard/History/EntryNew usan `getToken()`. Verificado: `vite build` OK y dev server responde 200. `.env.example` con vars `VITE_FIREBASE_*`. Commit + push (`0933182`)
 - [x] **Bloque D — Integración:** README actualizado con configuración de Firebase (crear proyecto, habilitar email/password, config web, service account con advertencia de seguridad), API con Bearer Token, requisitos y puesta en marcha. `git log` revisado (14 commits). Commit + push (`60e4395`)
+- [x] **Verificación sin BD (2026-08-30):** `.env` del backend y frontend configurados por el usuario (ignorados en git). **Firebase Admin OK:** token inválido → `401 "Token inválido o expirado"`. **Groq OK:** con `GROQ_MODEL=openai/gpt-oss-20b` el análisis devuelve JSON válido (`burnout_score 8`, `primary_emotion: "estrés"`, tags). **Modelo corregido:** `llama-3.3-70b-versatile` ya no existe en el catálogo de Groq (cambió en 2026); se actualizó `config.js`, `.env.example` y el `.env` local.
 
 ## Tareas Pendientes Inmediatas
-- [ ] **FASE 2 — Único pendiente:** verificación E2E real con credenciales de Firebase + Docker + `GROQ_API_KEY` (flujo completo: registro → login → crear entrada → análisis → historial). Pasos en el README.
-- [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY` + Firebase): flujo completo login → API → Groq → BD.
+- [ ] **FASE 2 — Único pendiente (para otro día):** verificación E2E real con Docker (BD + pgvector). Flujo completo: registro → login → crear entrada → análisis → historial. Pasos en el README.
 - [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
 - [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG.
 
@@ -53,7 +53,7 @@
 | Puerto (backend) | `3001` (`PORT` en `.env`) |
 | Puerto (frontend/dev) | `5173` con proxy `/api` → `http://localhost:3001` |
 | Ruta raíz | `POST /api/entries` y `GET /api/entries`; `GET /health` |
-| Modelo Groq | `llama-3.3-70b-versatile` (configurable con `GROQ_MODEL`) |
+| Modelo Groq | `openai/gpt-oss-20b` (configurable con `GROQ_MODEL`; el catálogo de Groq cambió en 2026 y `llama-3.3-70b-versatile` ya no existe) |
 | Formato de análisis | JSON con `burnout_score` (1-10), `primary_emotion`, `entities_tags[]` vía `response_format: json_object` |
 | Embeddings | Stub `generateEmbedding()` devuelve `null`; pendiente proveedor real para RAG |
 | Autenticación | **Fase 2 (frontend + backend listos):** Firebase Auth (email/password). Frontend: Bearer Token con cada petición. Backend: `requireAuth` valida con Firebase Admin SDK; `uid` = `user_id`. `users.id` es `VARCHAR` = UID |
