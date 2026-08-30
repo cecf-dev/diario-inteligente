@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 2 — Autenticación (Firebase Auth).** Bloque B — Backend (EN CURSO, verificación E2E pendiente)
+**FASE 2 — Autenticación (Firebase Auth).** Bloque B — Backend (COMPLETADO; verificación E2E pendiente)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -34,10 +34,9 @@
 - [x] Commit + push del Bloque 4 (`2ffeefb`, `11e2b33`)
 - [x] **FASE 2 — Autenticación:** revisión del prompt actualizado (Firebase Auth, `users.id`/`entries.user_id` → VARCHAR UID, /login y /register, rutas protegidas, historial por UID)
 - [x] **Bloque A — BD:** `001_schema.sql` actualizado: `users.id VARCHAR(255)` (PK = UID Firebase), `entries.user_id VARCHAR(255)` (FK). Se modificó en sitio porque aún no existe ninguna BD aprovisionada (verificación Docker pendiente); sin riesgo de pérdida de datos. Commit + push (`f9c1fd9`)
-- [x] **Bloque B — Backend (auth):** `firebase-admin` instalado; `src/firebase.js` (init lazy con `cert()` o ADC), middleware `requireAuth` (valida Bearer Token → `uid`, `401` si falta/venció), `ensureUser` (upsert del usuario en `users`), rutas `/api/entries` protegidas y con `uid` del token; historial filtrado por `req.user.uid`; usuario demo eliminado. Verificado: `/health` 200 sin credenciales Firebase; `/api/entries` sin token → 401.
+- [x] **Bloque B — Backend (auth):** `firebase-admin` instalado; `src/firebase.js` (init lazy con `cert()` o ADC), middleware `requireAuth` (valida Bearer Token → `uid`, `401` si falta/venció), `ensureUser` (upsert del usuario en `users`), rutas `/api/entries` protegidas y con `uid` del token; historial filtrado por `req.user.uid`; usuario demo eliminado. Verificado: `/health` 200 sin credenciales Firebase; `/api/entries` sin token → 401. Commit + push (`9788e08`)
 
 ## Tareas Pendientes Inmediatas
-- [ ] **Bloque B — pendiente:** registrar hash del commit + push exitoso.
 - [ ] **Bloque C — Frontend (auth):** SDK de Firebase client, AuthContext, pantallas `/login` y `/register`, rutas protegidas, enviar Bearer Token, logout.
 - [ ] **Bloque D — Integración:** README con pasos de Firebase (crear proyecto, service account, config web) y verificación.
 - [ ] **Verificación E2E pendiente** (requiere Docker + `GROQ_API_KEY` + Firebase): flujo completo login → API → Groq → BD.
