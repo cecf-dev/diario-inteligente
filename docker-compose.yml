@@ -1,0 +1,22 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: diario_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: diario
+      POSTGRES_PASSWORD: diario_password
+      POSTGRES_DB: diario_inteligente
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U diario -d diario_inteligente"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
