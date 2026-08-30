@@ -1,0 +1,21 @@
+{
+  "name": "diario-inteligente-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend del Diario Inteligente: Express + PostgreSQL/pgvector + Groq",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.6.0",
+    "pg": "^8.23.0"
+  }
+}
