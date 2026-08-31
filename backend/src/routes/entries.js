@@ -55,7 +55,12 @@ router.post('/', async (req, res, next) => {
       const entry = saved.rows[0];
 
       const analysis = await analyzeEntry(text);
-      const embedding = await generateEmbedding(text);
+      let embedding = null;
+      try {
+        embedding = await generateEmbedding(text);
+      } catch (err) {
+        console.warn('Embedding no disponible, se omite:', err.message);
+      }
 
       const inserted = await client.query(
         `INSERT INTO entry_analysis
@@ -85,6 +90,35 @@ router.get('/', async (req, res, next) => {
        ORDER BY e.created_at DESC`,
       [req.user.uid]
     );
+    res.json(result.rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/search', async (req, res, next) => {
+  try {
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+
+    if (!q) {
+      return res.status(400).json({ error: 'q (consulta) es obligatorio' });
+    }
+
+    const queryEmbedding = await generateEmbedding(q);
+
+    const result = await pool.query(
+      `SELECT e.id, e.raw_text, e.created_at,
+              a.burnout_score, a.primary_emotion, a.entities_tags,
+              1 - (a.embedding <=> $2) AS similarity
+       FROM entries e
+       LEFT JOIN entry_analysis a ON a.entry_id = e.id
+       WHERE e.user_id = $1
+         AND a.embedding IS NOT NULL
+       ORDER BY a.embedding <=> $2 ASC
+       LIMIT 10`,
+      [req.user.uid, JSON.stringify(queryEmbedding)]
+    );
+
     res.json(result.rows);
   } catch (err) {
     next(err);

@@ -9,6 +9,7 @@ export const config = {
     'postgresql://diario:diario_password@localhost:5432/diario_inteligente',
   groqApiKey: process.env.GROQ_API_KEY ?? '',
   groqModel: process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b',
+  jinaApiKey: process.env.JINA_API_KEY ?? '',
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID ?? '',
   firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? '',
 };

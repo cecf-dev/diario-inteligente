@@ -22,6 +22,10 @@ export function fetchAlerts(token) {
   return request('/entries/alerts', { token });
 }
 
+export function searchEntries(q, token) {
+  return request(`/entries/search?q=${encodeURIComponent(q)}`, { token });
+}
+
 export function createEntry(rawText, token) {
   return request('/entries', {
     method: 'POST',

@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 4 — Optimización del bundle frontend.** COMPLETADA. `React.lazy` + `Suspense` (code-splitting por ruta) y chunk separado para `recharts`/vendor. El bundle inicial bajó de ~706 kB (211 kB gzip) a ~330 kB (103 kB gzip); los gráficos se descargan solo al entrar a `/dashboard`.
+**FASE 5 — RAG: embeddings reales (Jina) + búsqueda semántica en el historial.** COMPLETADA. `generateEmbedding()` dejó de ser un stub: genera vectores de 1024 dims con Jina AI, se guardan en la columna `vector` de pgvector, y el historial permite búsqueda semántica por similitud coseno.
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -56,10 +56,18 @@
   - [x] `vite.config.js` con `manualChunks(id)` (función, requisito de rolldown en Vite 8) para aislar `recharts` en el chunk `charts` y el resto de `node_modules` en `vendor`
   - [x] Resultado: bundle inicial de ~706 kB (211 kB gzip) → `index` 5 kB + `vendor` 322 kB (~330 kB total / ~103 kB gzip); `recharts` queda en `charts` (362 kB) que solo se descarga al entrar a `/dashboard`; `/login`, `/register` y demás páginas son livianas (2-6 kB)
   - [x] Verificado: `vite build` OK (619 módulos, 1.9 s); dev server responde 200
+- [x] **FASE 5 — RAG: embeddings reales (Jina) + búsqueda semántica (2026-08-31):**
+  - [x] `backend/src/services/embeddingService.js` reemplaza el stub: llama a la API de Jina (`jina-embeddings-v3`, `dimensions: 1024`, `embedding_type: float`) y devuelve el vector completo (1024 dims, alineado con `VECTOR(1024)`)
+  - [x] `config.js` + `backend/.env.example` con `JINA_API_KEY`
+  - [x] `POST /api/entries` resiliente: si el embedding falla (sin key o error), se guarda `null` en la columna sin romper la creación de la entrada ni el análisis Groq
+  - [x] Nuevo endpoint `GET /api/entries/search?q=` (protegido): genera el embedding de la consulta y busca las 10 entradas más similares del usuario con `<=>` (similitud coseno) vía pgvector; devuelve `similarity` por resultado
+  - [x] Frontend `/history`: caja de búsqueda semántica (input + botón + limpiar); muestra `% similar` por resultado; vuelve a la línea de tiempo al limpiar
+  - [x] Verificado: `vite build` OK; embedding Jina genera 1024 dims; consulta "tensión y presión en la universidad" encuentra la entrada relacionada con 69% de similitud (aun sin palabras exactas); `/api/entries/search` protegido (401 sin token)
 
 ## Tareas Pendientes Inmediatas
-- [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG (columna `vector` de pgvector ya preparada).
-- [ ] **FASE 5 (próxima):** definir siguiente bloque de evolución. Candidatos: búsqueda semántica en `/history` (requiere embeddings reales) o RAG. A propuesta del usuario.
+- [ ] **Evidencia histórica:** las entradas creadas antes de la FASE 5 no tienen embedding (columna `null`); solo son buscables las creadas de ahora en adelante. Opcional: script de backfill para poblar embeddings de entradas existentes.
+- [ ] **Optimización:** los embeddings por entrada se pueden generar en paralelo/asíncrono (hoy son secuenciales dentro de `POST /api/entries`); evaluar cola de trabajos.
+- [ ] **FASE 6 (próxima):** definir siguiente bloque de evolución a propuesta del usuario.
 
 ## Decisiones Técnicas
 | Clave | Valor |
@@ -69,13 +77,14 @@
 | Frontend | `frontend/` — Vite 8, React 19, Tailwind v4 (`@tailwindcss/vite`), `recharts`, `react-router-dom` |
 | Puerto (backend) | `3001` (`PORT` en `.env`) |
 | Puerto (frontend/dev) | `5173` con proxy `/api` → `http://localhost:3001` |
-| Ruta raíz | `POST /api/entries` y `GET /api/entries`; `GET /api/entries/alerts`; `GET /health` |
+| Ruta raíz | `POST /api/entries` y `GET /api/entries`; `GET /api/entries/search?q=`; `GET /api/entries/alerts`; `GET /health` |
 | Modelo Groq | `openai/gpt-oss-20b` (configurable con `GROQ_MODEL`; el catálogo de Groq cambió en 2026 y `llama-3.3-70b-versatile` ya no existe) |
 | Formato de análisis | JSON con `burnout_score` (1-10), `primary_emotion`, `entities_tags[]` vía `response_format: json_object` |
-| Embeddings | Stub `generateEmbedding()` devuelve `null`; pendiente proveedor real para RAG |
+| Embeddings | **Fase 5:** Jina AI `jina-embeddings-v3` (1024 dims) vía `generateEmbedding()`; se guardan en `entry_analysis.embedding` (pgvector). `POST /api/entries` omite (null) si el embedding falla. Antes: stub que devolvía `null` |
+| Búsqueda semántica | **Fase 5:** `GET /api/entries/search?q=` usa operador `<=>` (similitud coseno) con HNSW sobre la columna `vector`; devuelve `similarity`. Solo encuentra entradas con embedding no-nulo |
 | Autenticación | **Fase 2 (frontend + backend listos):** Firebase Auth (email/password). Frontend: Bearer Token con cada petición. Backend: `requireAuth` valida con Firebase Admin SDK; `uid` = `user_id`. `users.id` es `VARCHAR` = UID |
 | Usuario por defecto | Eliminado (antes: `demo@diario.local`). `ensureUser()` da de alta el usuario en `users` a partir del token |
-| Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT`, `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_PATH` (`serviceAccountKey.json` — ignorado en git; NO subir al remoto) |
+| Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `JINA_API_KEY`, `PORT`, `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_PATH` (`serviceAccountKey.json` — ignorado en git; NO subir al remoto) |
 | Config frontend | `frontend/.env.example` → `VITE_API_URL` (default `/api`), `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` |
 | Alertas del dashboard | **Fase 3:** generadas por IA en el backend vía `GET /api/entries/alerts` (Groq analiza últimas 10 entradas → 0-3 alertas accionables). Antes eran heurística local en el frontend |
 | Imagen de BD | `pgvector/pgvector:pg16` (incluye extensión `vector`) |

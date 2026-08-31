@@ -9,6 +9,7 @@ Aplicación web de telemetría emocional y prevención de burnout para estudiant
 - **Autenticación:** Firebase Auth (frontend) + Firebase Admin SDK (backend)
 - **Base de Datos:** PostgreSQL 16 con extensión `pgvector`
 - **IA:** Groq API para inferencia ultrarrápida (modelo configurable vía `GROQ_MODEL`, default `openai/gpt-oss-20b`)
+- **Embeddings (RAG):** Jina AI (`jina-embeddings-v3`, 1024 dimensiones) para búsqueda semántica
 
 ## Estructura del Proyecto
 
@@ -39,8 +40,9 @@ Aplicación web de telemetría emocional y prevención de burnout para estudiant
 | Método | Ruta | Descripción |
 | :--- | :--- | :--- |
 | `GET` | `/health` | Chequeo de salud del servicio |
-| `POST` | `/api/entries` | Crea una entrada y dispara el análisis (Groq + embedding) — requiere token |
+| `POST` | `/api/entries` | Crea una entrada y dispara el análisis (Groq) + embedding (Jina) — requiere token |
 | `GET` | `/api/entries` | Historial de entradas del usuario autenticado — requiere token |
+| `GET` | `/api/entries/search?q=...` | Búsqueda semántica (RAG/pgvector) de las entradas del usuario — requiere token |
 | `GET` | `/api/entries/alerts` | Alertas de burnout generadas por IA (Groq) con las últimas 10 entradas — requiere token |
 
 Todas las rutas `/api/*` (excepto `/health`) exigen el header:
@@ -57,6 +59,7 @@ El `POST /api/entries` espera un JSON: `{ "raw_text": "..." }`. El `user_id` se 
 - **Docker** (para la base de datos con `pgvector`)
 - **Cuenta de Google / proyecto Firebase**
 - **API Key de Groq** (https://console.groq.com)
+- **API Key de Jina** (https://jina.ai/embeddings) — para los embeddings de búsqueda semántica
 
 ## Configuración de Firebase (una sola vez)
 
@@ -93,7 +96,7 @@ Levanta PostgreSQL en `localhost:5432` con la base `diario_inteligente` y ejecut
 ```bash
 cd backend
 cp .env.example .env      # Windows: copy .env.example .env
-# Edita .env: GROQ_API_KEY, FIREBASE_PROJECT_ID y FIREBASE_SERVICE_ACCOUNT_PATH
+# Edita .env: GROQ_API_KEY, JINA_API_KEY, FIREBASE_PROJECT_ID y FIREBASE_SERVICE_ACCOUNT_PATH
 npm install
 npm run dev               # http://localhost:3001
 ```
