@@ -56,15 +56,23 @@ router.post('/', async (req, res, next) => {
       );
       const entry = saved.rows[0];
 
-      const analysis = await analyzeEntry(text);
+      const [analysisResult, embeddingResult] = await Promise.allSettled([
+        analyzeEntry(text),
+        generateEmbedding(text).catch((err) => {
+          console.warn('Embedding no disponible, se omite:', err.message);
+          return null;
+        }),
+      ]);
+
+      if (analysisResult.status === 'rejected') {
+        throw analysisResult.reason;
+      }
+
+      const analysis = analysisResult.value;
       let embedding = null;
-      try {
-        const vector = await generateEmbedding(text);
-        if (vector?.length) {
-          embedding = `[${vector.join(',')}]`;
-        }
-      } catch (err) {
-        console.warn('Embedding no disponible, se omite:', err.message);
+      const vector = embeddingResult.status === 'fulfilled' ? embeddingResult.value : null;
+      if (vector?.length) {
+        embedding = `[${vector.join(',')}]`;
       }
 
       const inserted = await client.query(
