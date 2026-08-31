@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 2 — Autenticación (Firebase Auth).** COMPLETADA (todos los bloques A-D; solo resta verificación E2E con credenciales reales)
+**FASE 2 — Autenticación (Firebase Auth).** COMPLETADA (bloques A-D + verificación E2E real con Docker y flujo manual en el navegador)
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -38,11 +38,19 @@
 - [x] **Bloque C — Frontend (auth):** `firebase` (client) instalado; `src/firebase.js` (config web), `AuthContext` (login/register/logout/getToken + `onAuthStateChanged`), `ProtectedRoute`, páginas `/login` y `/register`, `App.jsx` con rutas protegidas y header con email + logout, `api.js` envía `Authorization: Bearer <token>`, Dashboard/History/EntryNew usan `getToken()`. Verificado: `vite build` OK y dev server responde 200. `.env.example` con vars `VITE_FIREBASE_*`. Commit + push (`0933182`)
 - [x] **Bloque D — Integración:** README actualizado con configuración de Firebase (crear proyecto, habilitar email/password, config web, service account con advertencia de seguridad), API con Bearer Token, requisitos y puesta en marcha. `git log` revisado (14 commits). Commit + push (`60e4395`)
 - [x] **Verificación sin BD (2026-08-30):** `.env` del backend y frontend configurados por el usuario (ignorados en git). **Firebase Admin OK:** token inválido → `401 "Token inválido o expirado"`. **Groq OK:** con `GROQ_MODEL=openai/gpt-oss-20b` el análisis devuelve JSON válido (`burnout_score 8`, `primary_emotion: "estrés"`, tags). **Modelo corregido:** `llama-3.3-70b-versatile` ya no existe en el catálogo de Groq (cambió en 2026); se actualizó `config.js`, `.env.example` y el `.env` local.
+- [x] **Verificación E2E real con Docker (2026-08-31):**
+  - [x] `docker compose up -d` OK: contenedor `diario_db` (pgvector/pgvector:pg16) corriendo y **healthy**
+  - [x] Migración ejecutada automáticamente: tablas `users`, `entries`, `entry_analysis` + extensión `vector` creadas
+  - [x] Conexión backend→BD verificada: pool consulta `entries` sin error (ya no hay ECONNREFUSED)
+  - [x] `FIREBASE_SERVICE_ACCOUNT_PATH` configurado con `serviceAccountKey.json` (credencial real); token inválido → `401`
+  - [x] Servicios corriendo: backend `:3001` (`/health` 200) y frontend Vite `:5173` (`/` y `/login` 200)
+  - [x] Flujo E2E manual en navegador: registro/login → crear entrada → análisis Groq → dashboard/historial renderizando correctamente (aprobado por el usuario)
+- [x] **Seguridad:** `serviceAccountKey.json` añadido a `.gitignore` (credencial privilegiada; no debe subirse al remoto)
 
 ## Tareas Pendientes Inmediatas
-- [ ] **FASE 2 — Único pendiente (para otro día):** verificación E2E real con Docker (BD + pgvector). Flujo completo: registro → login → crear entrada → análisis → historial. Pasos en el README.
 - [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
 - [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG.
+- [ ] **FASE 3 (próxima):** definir siguiente bloque de evolución (ej. alertas de burnout generadas por IA en el backend, o RAG con embeddings reales). A propuesta del usuario.
 
 ## Decisiones Técnicas
 | Clave | Valor |
@@ -58,7 +66,7 @@
 | Embeddings | Stub `generateEmbedding()` devuelve `null`; pendiente proveedor real para RAG |
 | Autenticación | **Fase 2 (frontend + backend listos):** Firebase Auth (email/password). Frontend: Bearer Token con cada petición. Backend: `requireAuth` valida con Firebase Admin SDK; `uid` = `user_id`. `users.id` es `VARCHAR` = UID |
 | Usuario por defecto | Eliminado (antes: `demo@diario.local`). `ensureUser()` da de alta el usuario en `users` a partir del token |
-| Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT`, `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_PATH` |
+| Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT`, `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_PATH` (`serviceAccountKey.json` — ignorado en git; NO subir al remoto) |
 | Config frontend | `frontend/.env.example` → `VITE_API_URL` (default `/api`), `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` |
 | Alertas del dashboard | Calculadas con heurística local (trabajo nocturno 23:00-06:00, alta frecuencia de `burnout_score ≥ 7`); pendiente generarlas con IA en el backend |
 | Imagen de BD | `pgvector/pgvector:pg16` (incluye extensión `vector`) |

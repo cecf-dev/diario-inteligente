@@ -4,5 +4,7 @@ build/
 .env
 .env.local
 *.log
+serviceAccountKey.json
+**/serviceAccountKey.json
 .DS_Store
 Thumbs.db
