@@ -66,10 +66,14 @@
   - [x] **Fix (2026-08-31):** `POST /api/entries` fallaba con "Vector contents must start with '['" porque se pasaba el array JS directamente (pg lo serializaba como `{"0.1","-0.2",...}` con comillas y llaves). Corregido convirtiendo el vector a literal de pgvector con corchetes: `` `[${vector.join(',')}]` ``. El endpoint `/search` ya usaba `JSON.stringify` (corchetes sin comillas, formato válido), por lo que no requería cambio. Commit `bd2dc4d`
   - [x] **Limpieza de datos huérfanos:** el bug anterior dejó 3 entradas duplicadas sin fila en `entry_analysis` (el INSERT del análisis fallaba tras haber insertado la entrada). Eliminadas; quedan 2 entradas válidas con análisis y embedding
   - [x] **Script de backfill:** `backend/scripts/backfill_embeddings.mjs` localiza entradas/sin análisis sin embedding y les genera/persiste el embedding (usa `grep` con `../src/`). Ejecutado: pobló embedding de las entradas existentes. Commit `ab3467f`
+- [x] **FASE 5.1 — Robustez: transacción en `POST /api/entries` (2026-08-31):**
+  - [x] `entries` + `entry_analysis` ahora se insertan dentro de una transacción explícita (`BEGIN`/`COMMIT`); en caso de error (p. ej. falla Groq) se ejecuta `ROLLBACK` para revertir la entrada y evitar huérfanas/duplicados
+  - [x] El embedding sigue siendo resiliente (se omite guardando `null` sin romper); la transacción solo revierte si el análisis Groq o el INSERT de `entry_analysis` fallan
+  - [x] El rollback se intenta en el catch (con try/catch propio por si la conexión ya se cerró) antes de propagar el error
+  - [x] Verificado con script de prueba: commit persiste entrada; rollback la deshace (solo quedó la entrada commiteada en la BD). Datos de prueba y script eliminados. Commit `e87f2b1`
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Optimización:** los embeddings por entrada se pueden generar en paralelo/asíncrono (hoy son secuenciales dentro de `POST /api/entries`); evaluar cola de trabajos.
-- [ ] **Robustez de transacción:** hoy si el análisis o el embedding fallan, la entrada ya quedó insertada sin análisis (huérfana). Evaluar envolver `entries` + `entry_analysis` en una transacción para revertir en caso de error.
 - [ ] **FASE 6 (próxima):** definir siguiente bloque de evolución a propuesta del usuario.
 
 ## Decisiones Técnicas

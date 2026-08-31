@@ -46,6 +46,8 @@ router.post('/', async (req, res, next) => {
 
     const client = await pool.connect();
     try {
+      await client.query('BEGIN');
+
       const saved = await client.query(
         `INSERT INTO entries (user_id, raw_text)
          VALUES ($1, $2)
@@ -73,7 +75,16 @@ router.post('/', async (req, res, next) => {
         [entry.id, analysis.burnout_score, analysis.primary_emotion, analysis.entities_tags, embedding]
       );
 
+      await client.query('COMMIT');
+
       res.status(201).json({ entry, analysis: inserted.rows[0] });
+    } catch (err) {
+      try {
+        await client.query('ROLLBACK');
+      } catch {
+        // el rollback puede fallar si la conexión ya se cerró
+      }
+      throw err;
     } finally {
       client.release();
     }
