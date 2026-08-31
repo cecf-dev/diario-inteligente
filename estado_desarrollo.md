@@ -70,7 +70,7 @@
   - [x] `entries` + `entry_analysis` ahora se insertan dentro de una transacción explícita (`BEGIN`/`COMMIT`); en caso de error (p. ej. falla Groq) se ejecuta `ROLLBACK` para revertir la entrada y evitar huérfanas/duplicados
   - [x] El embedding sigue siendo resiliente (se omite guardando `null` sin romper); la transacción solo revierte si el análisis Groq o el INSERT de `entry_analysis` fallan
   - [x] El rollback se intenta en el catch (con try/catch propio por si la conexión ya se cerró) antes de propagar el error
-  - [x] Verificado con script de prueba: commit persiste entrada; rollback la deshace (solo quedó la entrada commiteada en la BD). Datos de prueba y script eliminados. Commit `e87f2b1`
+  - [x] Verificado con script de prueba: commit persiste entrada; rollback la deshace (solo quedó la entrada commiteada en la BD). Datos de prueba y script eliminados. Commit `fb27cf2`
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Optimización:** los embeddings por entrada se pueden generar en paralelo/asíncrono (hoy son secuenciales dentro de `POST /api/entries`); evaluar cola de trabajos.
