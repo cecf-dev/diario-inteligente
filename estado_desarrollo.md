@@ -74,7 +74,7 @@
 - [x] **FASE 5.2 — Optimización: análisis y embedding en paralelo (2026-08-31):**
   - [x] En `POST /api/entries`, `analyzeEntry` (Groq) y `generateEmbedding` (Jina) ahora se lanzan en **paralelo** con `Promise.allSettled` en lugar de secuencialmente, reduciendo la latencia de respuesta
   - [x] Se preserva la semántica: el análisis Groq es obligatorio (si falla, `rejected` → se lanza y la transacción revierte); el embedding es opcional (si falla, se omite guardando `null` sin romper)
-  - [x] Verificado: backend arranca OK (`/health` 200) sin errores. Commit `a0b7f1c`
+  - [x] Verificado: backend arranca OK (`/health` 200) sin errores. Commit `f3f05a4`
 
 ## Tareas Pendientes Inmediatas
 - [ ] **FASE 6 (próxima):** definir siguiente bloque de evolución a propuesta del usuario.
