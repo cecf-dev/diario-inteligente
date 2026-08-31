@@ -57,7 +57,10 @@ router.post('/', async (req, res, next) => {
       const analysis = await analyzeEntry(text);
       let embedding = null;
       try {
-        embedding = await generateEmbedding(text);
+        const vector = await generateEmbedding(text);
+        if (vector?.length) {
+          embedding = `[${vector.join(',')}]`;
+        }
       } catch (err) {
         console.warn('Embedding no disponible, se omite:', err.message);
       }
