@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 3 — Alertas de burnout generadas por IA (backend).** COMPLETADA. El dashboard usa un endpoint del backend (`GET /api/entries/alerts`) que analiza las entradas recientes con Groq en lugar de la heurística local del frontend.
+**FASE 4 — Optimización del bundle frontend.** COMPLETADA. `React.lazy` + `Suspense` (code-splitting por ruta) y chunk separado para `recharts`/vendor. El bundle inicial bajó de ~706 kB (211 kB gzip) a ~330 kB (103 kB gzip); los gráficos se descargan solo al entrar a `/dashboard`.
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -51,11 +51,15 @@
   - [x] Nuevo endpoint `GET /api/entries/alerts` (protegido): lee las últimas 10 entradas del usuario desde la BD y devuelve `{ alerts: [...] }`; si no hay entradas devuelve `{ alerts: [] }` sin llamar a Groq
   - [x] Frontend: Dashboard sustituye la heurística local (`buildAlerts`) por la llamada al endpoint; `fetchAlerts` en `api.js`; carga en paralelo con `fetchEntries` (con fallback a `alerts: []` si la IA falla)
   - [x] Verificado: `vite build` OK; backend arranca sin errores; `/api/entries/alerts` y `/api/entries` protegidos (401 sin token); alerta de IA renderizada en el dashboard con una entrada real (aprobado por el usuario)
+- [x] **FASE 4 — Optimización del bundle (2026-08-31):**
+  - [x] `React.lazy` + `Suspense` en `App.jsx`: las páginas (`Login`, `Register`, `Dashboard`, `EntryNew`, `History`) se cargan bajo demanda en chunks separados
+  - [x] `vite.config.js` con `manualChunks(id)` (función, requisito de rolldown en Vite 8) para aislar `recharts` en el chunk `charts` y el resto de `node_modules` en `vendor`
+  - [x] Resultado: bundle inicial de ~706 kB (211 kB gzip) → `index` 5 kB + `vendor` 322 kB (~330 kB total / ~103 kB gzip); `recharts` queda en `charts` (362 kB) que solo se descarga al entrar a `/dashboard`; `/login`, `/register` y demás páginas son livianas (2-6 kB)
+  - [x] Verificado: `vite build` OK (619 módulos, 1.9 s); dev server responde 200
 
 ## Tareas Pendientes Inmediatas
-- [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
 - [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG (columna `vector` de pgvector ya preparada).
-- [ ] **FASE 4 (próxima):** definir siguiente bloque de evolución. Candidatos: búsqueda semántica en `/history` (requiere embeddings reales) o RAG. A propuesta del usuario.
+- [ ] **FASE 5 (próxima):** definir siguiente bloque de evolución. Candidatos: búsqueda semántica en `/history` (requiere embeddings reales) o RAG. A propuesta del usuario.
 
 ## Decisiones Técnicas
 | Clave | Valor |

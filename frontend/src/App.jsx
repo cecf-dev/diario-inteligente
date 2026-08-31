@@ -1,11 +1,13 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import EntryNew from './pages/EntryNew.jsx';
-import History from './pages/History.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const EntryNew = lazy(() => import('./pages/EntryNew.jsx'));
+const History = lazy(() => import('./pages/History.jsx'));
+const Login = lazy(() => import('./pages/Login.jsx'));
+const Register = lazy(() => import('./pages/Register.jsx'));
 
 const navLinkClass = ({ isActive }) =>
   `px-3 py-2 rounded-lg text-sm font-medium transition ${
@@ -54,43 +56,45 @@ function AppRoutes() {
     <>
       <Header />
       <main className="mx-auto max-w-4xl px-4 py-6">
-        <Routes>
-          <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-          <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Navigate to="/dashboard" replace />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/entry/new"
-            element={
-              <ProtectedRoute>
-                <EntryNew />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <ProtectedRoute>
-                <History />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+        <Suspense fallback={<p className="text-sm text-slate-500">Cargando…</p>}>
+          <Routes>
+            <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+            <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Navigate to="/dashboard" replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/entry/new"
+              element={
+                <ProtectedRoute>
+                  <EntryNew />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <History />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Suspense>
       </main>
     </>
   );
