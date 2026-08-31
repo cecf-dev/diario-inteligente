@@ -18,6 +18,10 @@ export function fetchEntries(token) {
   return request('/entries', { token });
 }
 
+export function fetchAlerts(token) {
+  return request('/entries/alerts', { token });
+}
+
 export function createEntry(rawText, token) {
   return request('/entries', {
     method: 'POST',

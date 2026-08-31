@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Link } from 'react-router-dom';
-import { fetchEntries } from '../api.js';
+import { fetchAlerts, fetchEntries } from '../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import StressBadge from '../components/StressBadge.jsx';
 
@@ -43,33 +43,10 @@ function buildWeekTrend(entries) {
   }));
 }
 
-function buildAlerts(entries) {
-  const cutoff = new Date();
-  cutoff.setHours(0, 0, 0, 0);
-  cutoff.setDate(cutoff.getDate() - 3);
-
-  const last3 = entries.filter((e) => new Date(e.created_at) >= cutoff);
-  const alerts = [];
-
-  const nocturnas = last3.filter((e) => {
-    const h = new Date(e.created_at).getHours();
-    return h >= 23 || h < 6;
-  });
-  if (nocturnas.length >= 2) {
-    alerts.push('Riesgo de burnout detectado por exceso de trabajo nocturno en los últimos 3 días.');
-  }
-
-  const altas = last3.filter((e) => e.burnout_score >= 7);
-  if (altas.length >= 2) {
-    alerts.push(`Nivel de estrés alto (≥7/10) en ${altas.length} de tus últimas entradas. Considera una pausa antes de seguir.`);
-  }
-
-  return alerts;
-}
-
 export default function Dashboard() {
   const { getToken } = useAuth();
   const [entries, setEntries] = useState(null);
+  const [alerts, setAlerts] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -77,8 +54,14 @@ export default function Dashboard() {
     (async () => {
       try {
         const token = await getToken();
-        const data = await fetchEntries(token);
-        if (alive) setEntries(data);
+        const [data, alertData] = await Promise.all([
+          fetchEntries(token),
+          fetchAlerts(token).catch(() => ({ alerts: [] })),
+        ]);
+        if (alive) {
+          setEntries(data);
+          setAlerts(alertData?.alerts ?? []);
+        }
       } catch (err) {
         if (alive) setError(err.message);
       }
@@ -111,7 +94,6 @@ export default function Dashboard() {
       totalWeek: weekScores.filter((s) => s != null).length,
       avg,
       dominant,
-      alerts: buildAlerts(entries),
       recent: entries.slice(0, 3),
     };
   }, [entries]);
@@ -135,11 +117,11 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500">Tendencias semanales de tu carga emocional.</p>
       </div>
 
-      {stats.alerts.length > 0 ? (
+      {alerts.length > 0 ? (
         <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
           <h2 className="mb-1 text-sm font-bold text-amber-800">Alertas de la IA</h2>
           <ul className="list-inside list-disc space-y-1 text-sm text-amber-800">
-            {stats.alerts.map((a, i) => (
+            {alerts.map((a, i) => (
               <li key={i}>{a}</li>
             ))}
           </ul>

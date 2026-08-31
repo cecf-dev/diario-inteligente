@@ -3,10 +3,35 @@ import { pool } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { analyzeEntry } from '../services/groqService.js';
 import { generateEmbedding } from '../services/embeddingService.js';
+import { buildAlerts } from '../services/alertsService.js';
 
 const router = Router();
 
 router.use(requireAuth);
+
+router.get('/alerts', async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      `SELECT e.id, e.raw_text, e.created_at,
+              a.burnout_score, a.primary_emotion, a.entities_tags
+       FROM entries e
+       LEFT JOIN entry_analysis a ON a.entry_id = e.id
+       WHERE e.user_id = $1
+       ORDER BY e.created_at DESC
+       LIMIT 10`,
+      [req.user.uid]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ alerts: [] });
+    }
+
+    const { alerts } = await buildAlerts(result.rows);
+    res.json({ alerts });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.post('/', async (req, res, next) => {
   try {

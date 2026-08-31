@@ -41,6 +41,7 @@ Aplicación web de telemetría emocional y prevención de burnout para estudiant
 | `GET` | `/health` | Chequeo de salud del servicio |
 | `POST` | `/api/entries` | Crea una entrada y dispara el análisis (Groq + embedding) — requiere token |
 | `GET` | `/api/entries` | Historial de entradas del usuario autenticado — requiere token |
+| `GET` | `/api/entries/alerts` | Alertas de burnout generadas por IA (Groq) con las últimas 10 entradas — requiere token |
 
 Todas las rutas `/api/*` (excepto `/health`) exigen el header:
 

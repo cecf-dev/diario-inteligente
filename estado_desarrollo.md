@@ -1,7 +1,7 @@
 # Estado de Desarrollo — Diario Inteligente
 
 ## Fase Actual
-**FASE 2 — Autenticación (Firebase Auth).** COMPLETADA (bloques A-D + verificación E2E real con Docker y flujo manual en el navegador)
+**FASE 3 — Alertas de burnout generadas por IA (backend).** COMPLETADA. El dashboard usa un endpoint del backend (`GET /api/entries/alerts`) que analiza las entradas recientes con Groq en lugar de la heurística local del frontend.
 
 ## Checklist de Tareas Completadas
 - [x] Lectura del prompt maestro `prompt_especificaciones_diario.md`
@@ -46,11 +46,16 @@
   - [x] Servicios corriendo: backend `:3001` (`/health` 200) y frontend Vite `:5173` (`/` y `/login` 200)
   - [x] Flujo E2E manual en navegador: registro/login → crear entrada → análisis Groq → dashboard/historial renderizando correctamente (aprobado por el usuario)
 - [x] **Seguridad:** `serviceAccountKey.json` añadido a `.gitignore` (credencial privilegiada; no debe subirse al remoto)
+- [x] **FASE 3 — Alertas de burnout con IA (2026-08-31):**
+  - [x] Nuevo servicio `backend/src/services/alertsService.js`: usa Groq (`buildAlerts`) para analizar las entradas recientes y emitir 0-3 alertas contextuales accionables en español (JSON con `alerts[]`, prompt empático y validación de salida)
+  - [x] Nuevo endpoint `GET /api/entries/alerts` (protegido): lee las últimas 10 entradas del usuario desde la BD y devuelve `{ alerts: [...] }`; si no hay entradas devuelve `{ alerts: [] }` sin llamar a Groq
+  - [x] Frontend: Dashboard sustituye la heurística local (`buildAlerts`) por la llamada al endpoint; `fetchAlerts` en `api.js`; carga en paralelo con `fetchEntries` (con fallback a `alerts: []` si la IA falla)
+  - [x] Verificado: `vite build` OK; backend arranca sin errores; `/api/entries/alerts` y `/api/entries` protegidos (401 sin token); alerta de IA renderizada en el dashboard con una entrada real (aprobado por el usuario)
 
 ## Tareas Pendientes Inmediatas
 - [ ] **Optimización:** el bundle de `vite build` supera 500 kB (recharts); evaluar code-splitting.
-- [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG.
-- [ ] **FASE 3 (próxima):** definir siguiente bloque de evolución (ej. alertas de burnout generadas por IA en el backend, o RAG con embeddings reales). A propuesta del usuario.
+- [ ] **Deuda técnica:** `generateEmbedding()` es un stub; conectar proveedor real de embeddings para RAG (columna `vector` de pgvector ya preparada).
+- [ ] **FASE 4 (próxima):** definir siguiente bloque de evolución. Candidatos: búsqueda semántica en `/history` (requiere embeddings reales) o RAG. A propuesta del usuario.
 
 ## Decisiones Técnicas
 | Clave | Valor |
@@ -60,7 +65,7 @@
 | Frontend | `frontend/` — Vite 8, React 19, Tailwind v4 (`@tailwindcss/vite`), `recharts`, `react-router-dom` |
 | Puerto (backend) | `3001` (`PORT` en `.env`) |
 | Puerto (frontend/dev) | `5173` con proxy `/api` → `http://localhost:3001` |
-| Ruta raíz | `POST /api/entries` y `GET /api/entries`; `GET /health` |
+| Ruta raíz | `POST /api/entries` y `GET /api/entries`; `GET /api/entries/alerts`; `GET /health` |
 | Modelo Groq | `openai/gpt-oss-20b` (configurable con `GROQ_MODEL`; el catálogo de Groq cambió en 2026 y `llama-3.3-70b-versatile` ya no existe) |
 | Formato de análisis | JSON con `burnout_score` (1-10), `primary_emotion`, `entities_tags[]` vía `response_format: json_object` |
 | Embeddings | Stub `generateEmbedding()` devuelve `null`; pendiente proveedor real para RAG |
@@ -68,7 +73,7 @@
 | Usuario por defecto | Eliminado (antes: `demo@diario.local`). `ensureUser()` da de alta el usuario en `users` a partir del token |
 | Config backend | `backend/.env.example` → `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL`, `PORT`, `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_PATH` (`serviceAccountKey.json` — ignorado en git; NO subir al remoto) |
 | Config frontend | `frontend/.env.example` → `VITE_API_URL` (default `/api`), `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` |
-| Alertas del dashboard | Calculadas con heurística local (trabajo nocturno 23:00-06:00, alta frecuencia de `burnout_score ≥ 7`); pendiente generarlas con IA en el backend |
+| Alertas del dashboard | **Fase 3:** generadas por IA en el backend vía `GET /api/entries/alerts` (Groq analiza últimas 10 entradas → 0-3 alertas accionables). Antes eran heurística local en el frontend |
 | Imagen de BD | `pgvector/pgvector:pg16` (incluye extensión `vector`) |
 | Puerto (BD) | `5432` (host) → 5432 (contenedor) |
 | Credenciales BD (local) | usuario: `diario` / password: `diario_password` / db: `diario_inteligente` (SÓLO local, no producción) |
